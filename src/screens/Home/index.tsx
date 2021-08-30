@@ -7,85 +7,96 @@ import { SearchBar } from '../../components/SearchBar';
 import { LoginDataItem } from '../../components/LoginDataItem';
 
 import {
-  Container,
-  Metadata,
-  Title,
-  TotalPassCount,
-  LoginList,
+	Container,
+	Metadata,
+	Title,
+	TotalPassCount,
+	LoginList,
 } from './styles';
 
 interface LoginDataProps {
-  id: string;
-  service_name: string;
-  email: string;
-  password: string;
+	id: string;
+	service_name: string;
+	email: string;
+	password: string;
 }
 
 type LoginListDataProps = LoginDataProps[];
 
 export function Home() {
-  const [searchText, setSearchText] = useState('');
-  const [searchListData, setSearchListData] = useState<LoginListDataProps>([]);
-  const [data, setData] = useState<LoginListDataProps>([]);
+	const [searchText, setSearchText] = useState('');
+	const [searchListData, setSearchListData] = useState<LoginListDataProps>([]);
+	const [data, setData] = useState<LoginListDataProps>([]);
 
-  async function loadData() {
-    const dataKey = '@savepass:logins';
-    // Get asyncStorage data, use setSearchListData and setData
-  }
+	async function loadData() {
+		const dataKey = '@savepass:logins';
+		// Get asyncStorage data, use setSearchListData and setData
 
-  function handleFilterLoginData() {
-    // Filter results inside data, save with setSearchListData
-  }
+		const dataStoraged = await AsyncStorage.getItem(dataKey)
+		const dataFormatted = dataStoraged ? JSON.parse(dataStoraged) : [] as LoginListDataProps
 
-  function handleChangeInputText(text: string) {
-    // Update searchText value
-  }
+		setSearchListData(dataFormatted)
+		setData(dataFormatted)
+	}
 
-  useFocusEffect(useCallback(() => {
-    loadData();
-  }, []));
+	function handleFilterLoginData() {
+		// Filter results inside data, save with setSearchListData
+		const listFiltered = data.filter(item => item.service_name === searchText)
+		setSearchListData(listFiltered)
+	}
 
-  return (
-    <>
-      <Header
-        user={{
-          name: 'Rocketseat',
-          avatar_url: 'https://i.ibb.co/ZmFHZDM/rocketseat.jpg'
-        }}
-      />
-      <Container>
-        <SearchBar
-          placeholder="Qual senha você procura?"
-          onChangeText={handleChangeInputText}
-          value={searchText}
-          returnKeyType="search"
-          onSubmitEditing={handleFilterLoginData}
+	function handleChangeInputText(text: string) {
+		// Update searchText value
+		if (text) {
+			setSearchText(text)
+		}
+	}
 
-          onSearchButtonPress={handleFilterLoginData}
-        />
+	useFocusEffect(useCallback(() => {
+		loadData();
+	}, []));
 
-        <Metadata>
-          <Title>Suas senhas</Title>
-          <TotalPassCount>
-            {searchListData.length
-              ? `${`${searchListData.length}`.padStart(2, '0')} ao total`
-              : 'Nada a ser exibido'
-            }
-          </TotalPassCount>
-        </Metadata>
+	return (
+		<>
+			<Header
+				user={{
+					name: 'Rocketseat',
+					avatar_url: 'https://i.ibb.co/ZmFHZDM/rocketseat.jpg'
+				}}
+			/>
+			<Container>
+				<SearchBar
+					placeholder="Qual senha você procura?"
+					onChangeText={handleChangeInputText}
+					value={searchText}
+					returnKeyType="search"
+					onSubmitEditing={handleFilterLoginData}
 
-        <LoginList
-          keyExtractor={(item) => item.id}
-          data={searchListData}
-          renderItem={({ item: loginData }) => {
-            return <LoginDataItem
-              service_name={loginData.service_name}
-              email={loginData.email}
-              password={loginData.password}
-            />
-          }}
-        />
-      </Container>
-    </>
-  )
+					onSearchButtonPress={handleFilterLoginData}
+				/>
+
+				<Metadata>
+					<Title>Suas senhas</Title>
+					<TotalPassCount>
+						{searchListData.length
+							? `${`${searchListData.length}`.padStart(2, '0')} ao total`
+							: 'Nada a ser exibido'
+						}
+					</TotalPassCount>
+				</Metadata>
+
+				<LoginList
+					keyExtractor={(item) => item.id}
+					data={searchListData}
+					renderItem={({ item: loginData }) => {
+						return <LoginDataItem
+							service_name={loginData.service_name}
+							email={loginData.email}
+							password={loginData.password}
+						/>
+					}}
+				/>
+			</Container>
+		</>
+	)
 }
